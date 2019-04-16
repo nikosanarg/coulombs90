@@ -189,7 +189,7 @@ class Carga():
 		self.carga = carga
 		self.color = definir_color(carga)
 		self.estatica = estatica
-		self.v = (0.0, 0.0)
+		self.vfe = (0.0, 0.0) # vector fuerza electrica
 
 	def move(self):
 		global full_screen, fps
@@ -200,8 +200,8 @@ class Carga():
 			else:
 				maxx = 683
 				maxy = 384 
-			px = self.x + self.v[0] / fps
-			py = self.y + self.v[1] / fps
+			px = self.x + self.vfe[0] / fps
+			py = self.y + self.vfe[1] / fps
 			if px > (maxx / 25):
 				self.x = maxx / 25
 			elif px < (-maxx / 25):
@@ -229,19 +229,21 @@ class Carga():
 			win.blit(texto_carga, (xint + orig_x - 17, yint + orig_y - 42))
 
 		# se calcula el vector fuerza resultante
-		self.v = (0.0, 0.0)
+		escala_fuerza = 3 # escala de velocidad de las partículas en el tiempo -> código: fuer90
+		self.vfe = (0.0, 0.0)
 		for q in cargas:
 			if q.x != self.x or q.y != self.y:
 				fuerza = calcular_fuerza(self, q)
 				versor = calcular_versor(self, q)
-				self.v = (self.v[0]+(versor[0] * fuerza), self.v[1]+(versor[1] * fuerza))
+				self.vfe = (self.vfe[0]+(versor[0] * fuerza / escala_fuerza), self.vfe[1]+(versor[1] * fuerza / escala_fuerza))
 		posi1 = (self.x * 25 + orig_x, -self.y * 25 + orig_y)
 		# se calcula el versor resultante puro
-		fuerza_total = math.sqrt((self.v[0])**2 + (self.v[1])**2)
+		fuerza_total = math.sqrt((self.vfe[0])**2 + (self.vfe[1])**2)
 		if fuerza_total == 0.0:
 			versor = (0.0, 0.0)
 		else:
-			versor = (self.v[0] / fuerza_total, self.v[1] / fuerza_total)
+			versor = (self.vfe[0] / fuerza_total, self.vfe[1] / fuerza_total)
+
 		# se realiza la escala para no dibujar versores extremadamente grandes o pequeños
 		escala = 10
 		if fuerza_total * escala > 150:
@@ -253,13 +255,15 @@ class Carga():
 		else:
 			vecfx = versor[0] * fuerza_total * escala
 			vecfy = versor[1] * fuerza_total * escala
+
 		# se calcula la posicion final del vector fuerza y se lo dibuja
 		posf1 = (round(vecfx + posi1[0]), round(-vecfy + posi1[1]))
-		pygame.draw.line(win, color_base, posi1, posf1, 3)
-		pygame.draw.circle(win, color_base, (posf1[0], posf1[1]), 5)
-		if ver_etiquetas:
-			fuerza_total = math.sqrt((self.v[0])**2 + (self.v[1])**2)
-			texto_f = font_f.render("{:.2f}N".format(fuerza_total), 1, color_base)
+		if not self.estatica:	
+			pygame.draw.line(win, color_base, posi1, posf1, 3)
+			pygame.draw.circle(win, color_base, (posf1[0], posf1[1]), 5)
+		if ver_etiquetas and not self.estatica:
+			fuerza_total = math.sqrt((self.vfe[0])**2 + (self.vfe[1])**2)
+			texto_f = font_f.render("{:.2f}N".format(fuerza_total * escala_fuerza), 1, color_base)
 			win.blit(texto_f, (posf1[0] - 15, posf1[1] - 20))
 
 def agregar_carga(x, y, q = 0.0, e = False):
@@ -269,7 +273,9 @@ def agregar_carga(x, y, q = 0.0, e = False):
 
 # ===== Variables de testeo =========================================
 
-#""" #DISPOSICION TUNEL 
+# código: disp90
+
+""" #DISPOSICION TUNEL 
 agregar_carga(3, 5, -1, True)
 agregar_carga(3, -5, -1, True)
 agregar_carga(0, 5, -1, True)
@@ -279,7 +285,7 @@ agregar_carga(-3, -5, -1, True)
 agregar_carga(-15, 0, -8.25, True)
 agregar_carga(20, 0, 30)#"""
 
-"""# DISPOSICION CUADRADO
+#"""# DISPOSICION CUADRADO
 agregar_carga(-2, -2, 1)
 agregar_carga(-2, 2, 1)
 agregar_carga(2, -2, 1)
@@ -288,6 +294,48 @@ agregar_carga(0, 6, -1, True)
 agregar_carga(0, -6, -1, True)
 agregar_carga(6, 0, -1, True)
 agregar_carga(-6, 0, -1, True)#"""
+
+"""# DISPOSICION VUELTA
+agregar_carga(0,4,0.5)
+
+agregar_carga(0,6,1,True)
+agregar_carga(3,6,1,True)
+agregar_carga(6,5,1,True)
+agregar_carga(9,5,1,True)
+agregar_carga(11,3,1,True)
+agregar_carga(12,0,1,True)
+agregar_carga(11,-3,1,True)
+agregar_carga(9,-5,1,True)
+agregar_carga(6,-5,1,True)
+agregar_carga(3,-6,1,True)
+agregar_carga(0,-6,1,True)
+agregar_carga(-3,-6,1,True)
+agregar_carga(-6,-5,1,True)
+agregar_carga(-9,-5,1,True)
+agregar_carga(-11,-3,1,True)
+agregar_carga(-12,0,1,True)
+agregar_carga(-11,3,1,True)
+agregar_carga(-9,5,1,True)
+agregar_carga(-6,5,1,True)
+agregar_carga(-3,6,1,True)
+
+agregar_carga(0,2,1,True)
+agregar_carga(3,2,1,True)
+agregar_carga(6,2,1,True)
+agregar_carga(7,0,1,True)
+agregar_carga(6,-2,1,True)
+agregar_carga(3,-2,1,True)
+agregar_carga(0,-2,1,True)
+agregar_carga(-3,-2,1,True)
+agregar_carga(-6,-2,1,True)
+agregar_carga(-7,0,1,True)
+agregar_carga(-6,2,1,True)
+agregar_carga(-3,2,1,True)
+
+agregar_carga(-4,0,-1,True)
+agregar_carga(0,0,-1,True)
+agregar_carga(4,0,-1,True)
+#"""
 
 
 
