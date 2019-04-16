@@ -12,7 +12,8 @@ import math
 
 full_screen = "ON" 	# PANTALLA COMPLETA ON/OFF
 modo_oscuro = "ON" 	# MODO PANTALLA OSCURA ON/OFF
-version = "v 1.3.0"
+version = "v 1.3.1"
+#v 1.3.0 primer release versionada en github
 
 background_wh = pygame.image.load("images/background.jpg")
 background_bl = pygame.image.load("images/backgroundblack.jpg")
@@ -43,7 +44,7 @@ icon = pygame.image.load("images/coulomb.ico")
 
 win.blit(bg, (0, 0))
 pygame.display.flip()
-pygame.display.set_caption("Coulombus ", version)
+pygame.display.set_caption("Coulombs ", version)
 pygame.display.set_icon(icon)
 
 # ===== Global Vars =================================================
@@ -141,9 +142,11 @@ def actualizar_ventana():
 	for q in cargas: 
 		q.draw(win) # dibujar las cargas en el mapa
 	
+	"""
 	if ver_etiquetas: # texto de tiempo, cargas, informacion, etc
 		texto_tiempo = font.render("{:.0f} segundos".format(time), 1, color_base)
-		win.blit(texto_tiempo, (20, 20))
+		win.blit(texto_tiempo, (20, 20))#"""
+
 	pygame.display.update()
 
 def calcular_distancia(q1, q2):
@@ -161,7 +164,7 @@ def calcular_fuerza(q1, q2):
 	global coulomb_constant
 	a_uC = 10 ** (-6) # llevar de μC (microCoulombs) a C (Coulombs)
 	r = calcular_distancia(q1, q2)
-	print(r)
+	#print(r)
 	fuerza = (coulomb_constant * q1.carga * a_uC * q2.carga * a_uC) / (r ** 2) # fuerza
 	return fuerza
 
